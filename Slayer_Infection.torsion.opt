@@ -1,0 +1,11 @@
+<TorsionProjectOptions>
+<Address>127.0.0.1</Address>
+<Password>password</Password>
+<Port>6060</Port>
+<LastConfig>Slayer_Infection</LastConfig>
+<Breakpoints/>
+<Bookmarks/>
+<OpenFiles>
+<File ScrollX="0" ScrollY="0" Active="true">Server.cs</File>
+</OpenFiles>
+</TorsionProjectOptions>

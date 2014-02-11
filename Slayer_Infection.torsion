@@ -1,0 +1,23 @@
+<TorsionProject>
+<Name>Slayer_Infection</Name>
+<WorkingDir/>
+<EntryScript>Server.cs</EntryScript>
+<DebugHook>dbgSetParameters( #port#, "#password#", true );</DebugHook>
+<Mods/>
+<ScannerExts>cs; gui</ScannerExts>
+<Configs>
+<Config>
+<Name>Slayer_Infection</Name>
+<Executable/>
+<Arguments/>
+<HasExports>false</HasExports>
+<Precompile>false</Precompile>
+<InjectDebugger>false</InjectDebugger>
+<UseSetModPaths>false</UseSetModPaths>
+</Config>
+</Configs>
+<SearchURL/>
+<SearchProduct>TGE</SearchProduct>
+<SearchVersion>HEAD</SearchVersion>
+<ExecModifiedScripts>false</ExecModifiedScripts>
+</TorsionProject>
