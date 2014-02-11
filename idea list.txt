@@ -1,0 +1,19 @@
+General Rules
+1) When a player kills someone, the person they killed joins their team.
+2) When a team has no players, they lose.
+3) If 'Gamemode Settings - Mode' #1 is enabled, other teams can only win if other Victory Methods are enabled.
+
+Gamemode Settings - Mode
+1) Only team 1 can switch players [bool]
+2) Amount of deaths until player switches team [1-10]
+3) On friendly kill, player switches to random opposing team [bool]
+4) End round on first team elimated [bool]
+
+Gamemode Settings - Player
+1) Switch Grace Period (time you have before a death by an opposing team switches you)
+
+Gamemode Settings - Respawn
+1) Switched Team Penalty [0-inf]
+
+Gamemode Settings - Points
+1) Switched a Player
