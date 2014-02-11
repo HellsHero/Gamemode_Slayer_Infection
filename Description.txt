@@ -1,3 +1,0 @@
-Title: Slayer - Infection
-Author: HellsHero
-When someone is killed by another team, they join the team that killed them.
