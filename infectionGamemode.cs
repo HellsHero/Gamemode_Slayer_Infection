@@ -21,17 +21,77 @@ if(!$Slayer::Server::Dependencies::Preferences)
 Slayer.Prefs.addPref("INF","Only team 1 can switch players","%mini.oneTeam","bool",0,1,1,-1,"Rules INF Mode");
 Slayer.Prefs.addPref("INF","Deaths until Player switches team","%mini.deathCountToSwitch","int 1 100",1,1,1,-1,"Rules INF Mode");
 Slayer.Prefs.addPref("INF","Switch killed player on friendly fire","%mini.friendlyFireSwitch","bool",0,0,1,-1,"Rules INF Mode");
-Slayer.Prefs.addPref("INF","End Round when a team is empty","%mini.endRoundOnEmptyTeam","bool",0,1,1,-1,"Rules INF Mode");
-
-Slayer.Prefs.addPref("INF","Switch Grace Period","%mini.player_switchTimeLimit","int 0 120",0,0,1,-1,"Rules INF Player");
-
-Slayer.Prefs.addPref("INF","Switched Team Penalty","%mini.respawn_switchPenalty","int 0 30",0,0,1,-1,"Rules INF Respawn");
-
+Slayer.Prefs.addPref("INF","End Round when a team is empty","%mini.endRoundOnEmptyTeam","bool",1,1,1,-1,"Rules INF Mode");
+Slayer.Prefs.addPref("INF","Switch Grace Period","%mini.player_switchTimeLimit","int 0 999",0,0,1,-1,"Rules INF Player");
+Slayer.Prefs.addPref("INF","Switched Team Penalty","%mini.respawnPenalty_switch","int 0 999",0,0,1,-1,"Rules INF Respawn","%mini.updateRespawnTime(switchRespawnPenalty,%1,%2);");
 Slayer.Prefs.addPref("INF","Switched a Player","%mini.points_switchPoints","int -999 999",1,0,1,-1,"Rules INF Points");
 
 
 
+//Functions to be used:
+//Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)   //Check for %mini.oneTeam, %mini.friendfireswitch, %client.switchGrace. after add client deathcount, if deathcount gets to deathcounttoswitch, set deathcount to 0 and switch client team and %client.switchgrace = getsimtime() and increment %killer's score
+                                                                //If(((%mini.oneTeam && %killer.team == 0) || (!%mini.oneTeam) || (%client.team == %killer.team && %mini.friendlyFireSwitch)) && (getSimTime()-%client.switchGrace > %mini.player_switchTimeLimit)) ->
+                                                                //{ Add to clients deathcount, if deathcount reaches deathCountToSwitch ->
+                                                                //[ set deathcount to 0 and switch client's team and %client.switchGrace = getSimTime() ] }
+                                                                
+//Slayer_INF_Teams_onLeave(%mini,%team,%client)                 //check if the team is now empty, if it is, check victory conditions
+
+//Slayer_INF_Teams_onJoin(%mini,%team,%client)
+
+//Slayer_INF_onLeave(%mini,%client)
+//
+//Slayer_INF_victoryCheck_Lives(%this)
+
+//Slayer_INF_victoryCheck_Time(%this)
+
+//Slayer_INF_victoryCheck_Points(%this)
 
 
+function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.friendfireswitch, %client.switchGrace. after add client deathcount, if deathcount gets to deathcounttoswitch, set deathcount to 0 and switch client team and %client.switchgrace = getsimtime() and increment %killer's score
+{
+    if(%killerTeam = %killer.getTeam() != Slayer.Teams.getObject(0) && %mini.oneTeam)
+        return;
+    if(%mini.friendlyFireSwitch || (!%mini.friendlyFireSwitch && %teamStatus = (%clientTeam = %client.getTeam() != %killerTeam))) //pass this if. friendly fire is enabled or friendly fire is disabled & teams aren't friendly
+    {
+        if(%time = getSimTime()-%client.switchGrace > %mini.player_switchTimeLimit*1000) //pass this if. grace time is passed (in ms)
+        {
+            if(%client.deathCountToSwitch++ >= %mini.deathCountToSwitch) //inc deathCount. pass this if. deathcount threshold reached
+            {
+                %client.deathCountToSwitch = 0;
+                echo(getSimTime() SPC %time);
+                %client.switchGrace = %time;
+                if(!%teamStatus) //pass this if. friendly fire is enabled
+                    Slayer_INF_switchTeam(%mini,%client,-1,%clientTeam);
+                else
+                {
+                    %killer.incScore(%mini.points_switchPoints);
+                    Slayer_INF_switchTeam(%mini,%client,%killerTeam,%clientTeam);
+                }
+            }
+        }
+    }
+}
 
-
+function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
+{
+    if(%newTeam != -1)
+        %newTeam.addMember(%client,"raison test");
+    else
+    {
+        %teamCount = Slayer.Teams.getCount();
+        for(%i=0;%i<%teamCount;%i++)
+        {
+            if(%team = %mini.Teams.getObject(%i) == %oldTeam)
+                continue;
+            if(%a)
+                %teamList = %teamList TAB %mini.Teams.getObject(%i);
+            else if(getFieldCount(%teamList) == 0)
+            {
+                %a = 1;
+                %teamList = %mini.Teams.getObject(%i) TAB;
+            }
+        }
+        %newTeam = getField(%teamList,getRandom(0,%teamCount-1));
+        %newTeam.addMember(%client,"raison random test");
+    }
+}

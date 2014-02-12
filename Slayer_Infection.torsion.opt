@@ -6,6 +6,9 @@
 <Breakpoints/>
 <Bookmarks/>
 <OpenFiles>
-<File ScrollX="0" ScrollY="0" Active="true">Server.cs</File>
+<File ScrollX="0" ScrollY="0">Server.cs</File>
+<File ScrollX="0" ScrollY="28" Active="true">infectionGamemode.cs</File>
+<File ScrollX="0" ScrollY="137">..\Gamemode_Slayer_Leader\leaderGamemodes.cs</File>
+<File ScrollX="0" ScrollY="1032">..\Gamemode_Slayer\Dependencies\Minigames.cs</File>
 </OpenFiles>
 </TorsionProjectOptions>
