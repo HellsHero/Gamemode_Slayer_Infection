@@ -15,17 +15,16 @@ Slayer.Gamemodes.addMode("Infection","INF",1,1);
 
 if(!$Slayer::Server::Dependencies::Preferences)
 	exec("Add-ons/Gamemode_Slayer/Dependencies/Preferences.cs");
-Slayer.Prefs.addPref("INF","Only team 1 can switch players","%mini.oneTeam","bool",0,1,1,-1,"Rules INF Mode");
-Slayer.Prefs.addPref("INF","Deaths until Player switches team","%mini.deathCountToSwitch","int 1 100",1,1,1,-1,"Rules INF Mode");
-Slayer.Prefs.addPref("INF","Switch killed player on friendly fire","%mini.friendlyFireSwitch","bool",0,0,1,-1,"Rules INF Mode");
+Slayer.Prefs.addPref("INF","Only team 1 can Infect players","%mini.oneTeam","bool",0,1,1,-1,"Rules INF Mode");
+Slayer.Prefs.addPref("INF","Deaths until player Infects","%mini.deathCountToSwitch","int 1 100",1,1,1,-1,"Rules INF Mode");
+Slayer.Prefs.addPref("INF","Reverse Infect teamkilled player","%mini.friendlyFireSwitch","bool",0,0,1,-1,"Rules INF Mode");
 Slayer.Prefs.addPref("INF","End Round when","%mini.endRoundOnEmptyTeam","list" TAB "0 All but one team becomes empty" TAB "1 A team becomes empty",0,1,1,-1,"Rules INF Mode");
-Slayer.Prefs.addPref("INF","Switch Grace Period","%mini.player_switchTimeLimit","int 0 999",0,0,1,-1,"Rules INF Player");
-Slayer.Prefs.addPref("INF","Switched Team Penalty","%mini.respawnPenalty_switch","int 0 999",0,0,1,-1,"Rules INF Respawn","%mini.updateRespawnTime(switchRespawnPenalty,%1,%2);");
-Slayer.Prefs.addPref("INF","Switched a Player","%mini.points_switchPoints","int -999 999",1,0,1,-1,"Rules INF Points");
+Slayer.Prefs.addPref("INF","Infect-proof Time","%mini.player_switchTimeLimit","int 0 999",0,0,1,-1,"Rules INF Player");
+Slayer.Prefs.addPref("INF","Infected Penalty","%mini.respawnPenalty_switch","int 0 999",0,0,1,-1,"Rules INF Respawn","%mini.updateRespawnTime(switchRespawnPenalty,%1,%2);");
+Slayer.Prefs.addPref("INF","Infected a Player","%mini.points_switchPoints","int -999 999",1,0,1,-1,"Rules INF Points");
 
-function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.friendfireswitch, %client.switchGrace. after add client deathcount, if deathcount gets to deathcounttoswitch, set deathcount to 0 and switch client team and %client.switchgrace = getsimtime() and increment %killer's score
+function Slayer_INF_postDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.friendfireswitch, %client.switchGrace. after add client deathcount, if deathcount gets to deathcounttoswitch, set deathcount to 0 and switch client team and %client.switchgrace = getsimtime() and increment %killer's score
 {
-    echo("%type = " @ %type);
     %killerTeam = %killer.getTeam();
     if(%killerTeam != %mini.Teams.getObject(0) && %mini.oneTeam)
         return;
@@ -47,7 +46,6 @@ function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.fri
                     %killer.incScore(%mini.points_switchPoints);
                     schedule(10,0,Slayer_INF_switchTeam,%mini,%client,%killerTeam,%clientTeam);
                 }
-                return 1 TAB %type; //return special kill message with the normal type.
             }
         }
     }
@@ -73,7 +71,7 @@ function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
                 %teamList = %teamList TAB %teams.getObject(%i);
         }
         %newTeam = getField(%teamList,getRandom(0,%teamCount-2));
-        %newTeam.addMember(%client,"Friendly Fire",1);
+        %newTeam.addMember(%client,"Reverse Infection",1);
     }
 }
 
