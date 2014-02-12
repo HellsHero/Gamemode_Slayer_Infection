@@ -21,7 +21,7 @@ if(!$Slayer::Server::Dependencies::Preferences)
 Slayer.Prefs.addPref("INF","Only team 1 can switch players","%mini.oneTeam","bool",0,1,1,-1,"Rules INF Mode");
 Slayer.Prefs.addPref("INF","Deaths until Player switches team","%mini.deathCountToSwitch","int 1 100",1,1,1,-1,"Rules INF Mode");
 Slayer.Prefs.addPref("INF","Switch killed player on friendly fire","%mini.friendlyFireSwitch","bool",0,0,1,-1,"Rules INF Mode");
-Slayer.Prefs.addPref("INF","End Round when a team is empty","%mini.endRoundOnEmptyTeam","bool",1,1,1,-1,"Rules INF Mode");
+Slayer.Prefs.addPref("INF","End Round when","%mini.endRoundOnEmptyTeam","list" TAB "0 All but one team becomes empty" TAB "1 A team becomes empty",0,1,1,-1,"Rules INF Mode");
 Slayer.Prefs.addPref("INF","Switch Grace Period","%mini.player_switchTimeLimit","int 0 999",0,0,1,-1,"Rules INF Player");
 Slayer.Prefs.addPref("INF","Switched Team Penalty","%mini.respawnPenalty_switch","int 0 999",0,0,1,-1,"Rules INF Respawn","%mini.updateRespawnTime(switchRespawnPenalty,%1,%2);");
 Slayer.Prefs.addPref("INF","Switched a Player","%mini.points_switchPoints","int -999 999",1,0,1,-1,"Rules INF Points");
@@ -39,12 +39,7 @@ Slayer.Prefs.addPref("INF","Switched a Player","%mini.points_switchPoints","int 
 //Slayer_INF_Teams_onJoin(%mini,%team,%client)
 
 //Slayer_INF_onLeave(%mini,%client)
-//
-//Slayer_INF_victoryCheck_Lives(%this)
 
-//Slayer_INF_victoryCheck_Time(%this)
-
-//Slayer_INF_victoryCheck_Points(%this)
 
 
 function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.friendfireswitch, %client.switchGrace. after add client deathcount, if deathcount gets to deathcounttoswitch, set deathcount to 0 and switch client team and %client.switchgrace = getsimtime() and increment %killer's score
@@ -74,24 +69,65 @@ function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.fri
 
 function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
 {
+    if(%mini.getLives() > 0)
+        %client.tempLives = %client.getLives();
     if(%newTeam != -1)
-        %newTeam.addMember(%client,"raison test");
+        %newTeam.addMember(%client,"raison test",1);
     else
     {
-        %teamCount = Slayer.Teams.getCount();
+        %teams = %mini.Teams;
+        %teamCount = %teams.getCount();
         for(%i=0;%i<%teamCount;%i++)
         {
-            if(%team = %mini.Teams.getObject(%i) == %oldTeam)
+            if(%teams.getObject(%i) == %oldTeam)
                 continue;
-            if(%a)
-                %teamList = %teamList TAB %mini.Teams.getObject(%i);
-            else if(getFieldCount(%teamList) == 0)
-            {
-                %a = 1;
-                %teamList = %mini.Teams.getObject(%i) TAB;
-            }
+            if(%teamList) $= "")
+                %teamList = %teams.getObject(%i) TAB;
+            else
+                %teamList = %teamList TAB %teams.getObject(%i);
         }
         %newTeam = getField(%teamList,getRandom(0,%teamCount-1));
-        %newTeam.addMember(%client,"raison random test");
+        %newTeam.addMember(%client,"raison random test",1);
     }
 }
+
+function Slayer_INF_Teams_onJoin(%mini,%team,%client) //keep lives constant between team switches
+{
+    if(%mini.getLives() > 0 && %client.tempLives >= 0)
+    {
+        %client.setLives(%client.tempLives);
+        %client.tempLives = "";
+    }
+}
+
+function Slayer_INF_Teams_onLeave(%mini,%team,%client) //call function for when the client has left the team
+{
+    echo(%team.numMembers SPC "Member COUNT");
+    schedule(1,0,Slayer_INF_postLeave(%mini,%team,%client));
+}
+
+function Slayer_INF_postLeave(%mini,%team,%client) //check if a team is empty, if so, end round
+{
+    echo(%team.numMembers SPC "Member COUNT after");
+    if(%team.numMembers == 0 || !%team.getLiving())
+    {
+        %teams = %mini.Teams;
+        if(%teamCount = %teams.getCount() == 2) //All but one team && A team becomes empty
+            %mini.endRound((((%a = %mini.Teams.getObject(0)) == %team) ? %mini.Teams.getObject(1) : %a));
+        else
+        {
+            if(!%mini.endRoundOnEmptyTeam)
+            {
+                //check teams for life and membership
+                //if only one team has living members it is victorious
+            }
+            else
+            {
+                //get name of teams with players still living and with members
+                //make those teams victorious
+            }
+        }
+
+    }
+}
+
