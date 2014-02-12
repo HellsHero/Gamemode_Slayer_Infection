@@ -13,8 +13,4 @@
 if(%error == $Error::Addon_NotFound)
 	error("ERROR: Gamemode_Slayer_Infection - Required add-on Gamemode_Slayer not found!");
 else
-{
 	exec("./infectionGamemode.cs");
-	//what is this who are you where am i
-	//exec("./twoinfection.cs");
-}
