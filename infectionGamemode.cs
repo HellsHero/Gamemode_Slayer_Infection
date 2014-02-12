@@ -25,7 +25,7 @@ Slayer.Prefs.addPref("INF","Switched a Player","%mini.points_switchPoints","int 
 
 function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.friendfireswitch, %client.switchGrace. after add client deathcount, if deathcount gets to deathcounttoswitch, set deathcount to 0 and switch client team and %client.switchgrace = getsimtime() and increment %killer's score
 {
-    if(%killerTeam = %killer.getTeam() != Slayer.Teams.getObject(0) && %mini.oneTeam)
+    if((%killerTeam = %killer.getTeam()) != %mini.Teams.getObject(0) && %mini.oneTeam)
         return;
     if(%mini.friendlyFireSwitch || (!%mini.friendlyFireSwitch && %teamStatus = ((%clientTeam = %client.getTeam()) != %killerTeam))) //pass this if. friendly fire is enabled or friendly fire is disabled & teams aren't friendly
     {
@@ -50,7 +50,7 @@ function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.fri
 
 function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
 {
-    if(%mini.getLives() > 0)
+    if(%mini.lives > 0)
         %client.tempLives = %client.getLives();
     if(%newTeam != -1)
         %newTeam.addMember(%client,"raison test",1);
@@ -62,7 +62,7 @@ function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
         {
             if(%teams.getObject(%i) == %oldTeam)
                 continue;
-            if(%teamList) $= "")
+            if(%teamList $= "")
                 %teamList = %teams.getObject(%i);
             else
                 %teamList = %teamList TAB %teams.getObject(%i);
@@ -74,7 +74,7 @@ function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
 
 function Slayer_INF_Teams_onJoin(%mini,%team,%client) //keep lives constant between team switches
 {
-    if(%mini.getLives() > 0 && %client.tempLives >= 0)
+    if(%mini.lives > 0 && %client.tempLives >= 0)
     {
         %client.setLives(%client.tempLives);
         %client.tempLives = "";
@@ -84,7 +84,7 @@ function Slayer_INF_Teams_onJoin(%mini,%team,%client) //keep lives constant betw
 function Slayer_INF_Teams_onLeave(%mini,%team,%client) //call function for when the client has left the team
 {
     echo(%team.numMembers SPC "Member COUNT");
-    schedule(1,0,Slayer_INF_postLeave(%mini,%team,%client));
+    schedule(10,0,Slayer_INF_postLeave(%mini,%team,%client));
 }
 
 function Slayer_INF_postLeave(%mini,%team,%client) //check if a team is empty, if so, end round
@@ -114,4 +114,9 @@ function Slayer_INF_postLeave(%mini,%team,%client) //check if a team is empty, i
                 %mini.endRound(%teamList);
         }
     }
+}
+
+function Slayer_INF_onModeStart(%mini)
+{
+    %mini.Teams.balanceTeams = 0;
 }
