@@ -72,7 +72,7 @@ function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
             else
                 %teamList = %teamList TAB %teams.getObject(%i);
         }
-        %newTeam = getField(%teamList,getRandom(0,%teamCount-1));
+        %newTeam = getField(%teamList,getRandom(0,%teamCount-2));
         %newTeam.addMember(%client,"Friendly Fire",1);
     }
 }
