@@ -96,7 +96,7 @@ function Slayer_INF_postLeave(%mini,%team,%client) //check if a team is empty, i
     if(%team.numMembers == 0 || !%team.getLiving())
     {
         %teams = %mini.Teams;
-        %teamCount = %team.getCount();
+        %teamCount = %teams.getCount();
         if(%teamCount == 2) //All but one team && A team becomes empty
             %mini.endRound((((%a = %mini.Teams.getObject(0)) == %team) ? %mini.Teams.getObject(1) : %a));
         else
