@@ -25,6 +25,7 @@ Slayer.Prefs.addPref("INF","Switched a Player","%mini.points_switchPoints","int 
 
 function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.friendfireswitch, %client.switchGrace. after add client deathcount, if deathcount gets to deathcounttoswitch, set deathcount to 0 and switch client team and %client.switchgrace = getsimtime() and increment %killer's score
 {
+    echo("%type = " @ %type);
     if((%killerTeam = %killer.getTeam()) != %mini.Teams.getObject(0) && %mini.oneTeam)
         return;
     if(%mini.friendlyFireSwitch || (!%mini.friendlyFireSwitch && %teamStatus = ((%clientTeam = %client.getTeam()) != %killerTeam))) //pass this if. friendly fire is enabled or friendly fire is disabled & teams aren't friendly
@@ -37,12 +38,13 @@ function Slayer_INF_preDeath(%mini,%client,%obj,%killer,%type,%area)// %mini.fri
                 echo(getSimTime() SPC %time);
                 %client.switchGrace = %time;
                 if(!%teamStatus) //pass this if. friendly fire is enabled
-                    Slayer_INF_switchTeam(%mini,%client,-1,%clientTeam);
+                    schedule(10,0,Slayer_INF_switchTeam,%mini,%client,-1,%clientTeam);
                 else
                 {
                     %killer.incScore(%mini.points_switchPoints);
-                    Slayer_INF_switchTeam(%mini,%client,%killerTeam,%clientTeam);
+                    schedule(10,0,Slayer_INF_switchTeam,%mini,%client,%killerTeam,%clientTeam);
                 }
+                return 0;
             }
         }
     }
@@ -53,7 +55,7 @@ function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
     if(%mini.lives > 0)
         %client.tempLives = %client.getLives();
     if(%newTeam != -1)
-        %newTeam.addMember(%client,"raison test",1);
+        %newTeam.addMember(%client,"Infected",1);
     else
     {
         %teams = %mini.Teams;
@@ -68,7 +70,7 @@ function Slayer_INF_switchTeam(%mini,%client,%newTeam,%oldTeam)
                 %teamList = %teamList TAB %teams.getObject(%i);
         }
         %newTeam = getField(%teamList,getRandom(0,%teamCount-1));
-        %newTeam.addMember(%client,"raison random test",1);
+        %newTeam.addMember(%client,"Friendly Fire",1);
     }
 }
 
@@ -83,13 +85,11 @@ function Slayer_INF_Teams_onJoin(%mini,%team,%client) //keep lives constant betw
 
 function Slayer_INF_Teams_onLeave(%mini,%team,%client) //call function for when the client has left the team
 {
-    echo(%team.numMembers SPC "Member COUNT");
-    schedule(10,0,Slayer_INF_postLeave(%mini,%team,%client));
+    schedule(10,0,Slayer_INF_postLeave,%mini,%team,%client);
 }
 
 function Slayer_INF_postLeave(%mini,%team,%client) //check if a team is empty, if so, end round
 {
-    echo(%team.numMembers SPC "Member COUNT after");
     if(%team.numMembers == 0 || !%team.getLiving())
     {
         %teams = %mini.Teams;
@@ -118,5 +118,12 @@ function Slayer_INF_postLeave(%mini,%team,%client) //check if a team is empty, i
 
 function Slayer_INF_onModeStart(%mini)
 {
+    %mini.Teams.balanceTeams = 0;
+}
+
+function Slayer_INF_preReset(%mini,%client)
+{
+    %mini.Teams.balanceTeams = 1;
+    %mini.Teams.shuffleTeams(1);
     %mini.Teams.balanceTeams = 0;
 }
